@@ -5,6 +5,9 @@ class TraceController {
     const {
       serviceName,
       traceId,
+      timestamp,
+      checkpointName,
+      isError,
       genericData
     } = request.body;
 
@@ -16,9 +19,16 @@ class TraceController {
       return response.status(404).json({ error: 'Trace ID is required' });
     }
 
+    if (!checkpointName) {
+      return response.status(404).json({ error: 'Checkpoint name is required' });
+    }
+
     const trace = await TraceRepository.create({
       serviceName,
       traceId,
+      timestamp,
+      checkpointName,
+      isError,
       genericData: genericData || null
     });
 

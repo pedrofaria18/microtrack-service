@@ -5,6 +5,9 @@ class TraceRepository {
     const trace = await tracesCollection.insertOne({
       serviceName,
       traceId,
+      timestamp,
+      checkpointName,
+      isError,
       genericData
     });
 

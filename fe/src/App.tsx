@@ -1,8 +1,3 @@
-import Header from './components/Header';
-import CarsProvider from './contexts/useCars';
-
-import ApplicationRoutes from './Routes';
-
 function App() {
   return (
     <div
@@ -12,11 +7,7 @@ function App() {
         
       "
     >
-      <CarsProvider>
-        <Header />
-
-        <ApplicationRoutes />
-      </CarsProvider>
+      Oi
     </div>
   );
 }
