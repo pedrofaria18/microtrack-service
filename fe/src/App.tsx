@@ -1,13 +1,19 @@
+import { BrowserRouter } from 'react-router-dom';
+import ApplicationRoutes from './Routes';
+
 function App() {
   return (
     <div
       className="
-        bg-background
-        min-h-screen
-        
+        w-full
+        max-w-[1200px]
+        mx-auto
+        px-4
       "
     >
-      Oi
+      <BrowserRouter>
+        <ApplicationRoutes />
+      </BrowserRouter>
     </div>
   );
 }
