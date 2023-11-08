@@ -22,11 +22,34 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => { });
 
   socket.on('visualizarTrace', (traceId) => {
-    setInterval(() => {
-      tracesCollection.findOne({ traceId }).then((trace) => {
-        socket.emit('trace', trace);
+    tracesCollection.findOne({ traceId }).then((trace) => {
+
+      let nodes = [];
+      let edges = [];
+
+      trace.events.forEach((event) => {
+        event.successorBy.map((successor) => {
+          edges.push({
+            source: successor,
+            target: event.checkpointName,
+          });
+        })
+
+        nodes.push({
+          id: event.id,
+          serviceName: event.serviceName,
+          checkpointName: event.checkpointName,
+          timestamp: event.timestamp,
+          isError: event.isError,
+          genericData: event.genericData,
+        });
       });
-    }, 1000);
+
+      socket.emit('trace', {
+        nodes,
+        edges,
+      });
+    });
   });
 });
 

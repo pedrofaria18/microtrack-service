@@ -13,3 +13,7 @@ export const getTrace = async (traceId: string) => {
   const { data } = await api.get(`/traces/${traceId}`);
   return data;
 };
+
+export const deleteTrace = async (traceId: string) => {
+  await api.delete(`/traces/${traceId}`);
+};

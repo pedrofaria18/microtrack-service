@@ -1,12 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useParams } from 'react-router-dom';
 
 import { io } from 'socket.io-client';
 
-import ReactFlow, { MarkerType } from 'reactflow';
+import ReactFlow, {
+  Controls,
+  MarkerType,
+  applyEdgeChanges,
+  applyNodeChanges,
+} from 'reactflow';
+
 import { CustomModal } from '../components/CustomModal';
-import { Event } from '../types/Trace';
 
 export default function Trace() {
   const { traceId } = useParams();
@@ -14,7 +19,7 @@ export default function Trace() {
   const [nodes, setNodes] = useState<any[]>([]);
   const [edges, setEdges] = useState<any[]>([]);
 
-  const [nodeSelected, setNodeSelected] = useState<Event>({} as Event);
+  const [nodeSelected, setNodeSelected] = useState<string>('');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -34,26 +39,35 @@ export default function Trace() {
     });
 
     socket.on('trace', (change) => {
-      const eventsNodes = change.events.map((event: any, index: number) => {
+      const initialNodes = change.nodes.map((node: any, index: number) => {
+        const hasTarget = change.edges.some(
+          (edge: any) => edge.source === node.checkpointName
+        );
+
         return {
-          id: Math.random().toString(),
-          data: { label: event.checkpointName, event },
-          position: { x: index * 200, y: 0 },
-          sourcePosition: index === change.events.length - 1 ? 'left' : 'right',
+          id: node.checkpointName,
+          data: { label: node.checkpointName, node },
+          position: {
+            x: index === 0 ? 0 : Math.random() * 1000,
+            y: index === 0 ? 0 : Math.random() * 500,
+          },
+          sourcePosition: hasTarget ? 'right' : 'left',
           targetPosition: index === 0 ? 'right' : 'left',
           connectable: false,
-          dragbable: true,
           style: {
+            borderColor: node.isError ? '#FF0000' : '#1a192b',
+            color: node.isError ? '#FF0000' : '#1a192b',
+            boxShadow: `0 0 0 0.5px ${node.isError ? '#FF0000' : '#1a192b'}`,
             cursor: 'pointer',
           },
         };
       });
 
-      const eventsEdges = change.events.map((event: any, index: number) => {
+      const initialEdges = change.edges.map((edge: any) => {
         return {
           id: Math.random().toString(),
-          source: eventsNodes[index].id,
-          target: eventsNodes[index + 1]?.id,
+          source: edge.source,
+          target: edge.target,
           style: { stroke: '#1a192b', strokeWidth: 2 },
           markerEnd: {
             type: MarkerType.ArrowClosed,
@@ -62,14 +76,23 @@ export default function Trace() {
         };
       });
 
-      setNodes(eventsNodes);
-      setEdges(eventsEdges);
+      setNodes(initialNodes);
+      setEdges(initialEdges);
     });
 
     return () => {
       socket.disconnect();
     };
   }, [traceId]);
+
+  const onNodesChange = useCallback(
+    (changes: any) => setNodes((nds) => applyNodeChanges(changes, nds)),
+    []
+  );
+  const onEdgesChange = useCallback(
+    (changes: any) => setEdges((eds) => applyEdgeChanges(changes, eds)),
+    []
+  );
 
   return (
     <div>
@@ -101,18 +124,26 @@ export default function Trace() {
           nodes={nodes}
           edges={edges}
           fitView
-          onNodeClick={(event, node) => {
-            setNodeSelected(node.data.event);
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onNodeClick={(_, node) => {
+            setNodeSelected(node.data.node.checkpointName);
             openModal();
           }}
-        />
+        >
+          <Controls />
+        </ReactFlow>
       </div>
 
       {isModalOpen && (
         <CustomModal
           isOpen={isModalOpen}
           onRequestClose={closeModal}
-          body={nodeSelected}
+          body={{
+            events: nodes
+              .filter((node) => node.id === nodeSelected)
+              .map((node) => node.data.node),
+          }}
         />
       )}
     </div>

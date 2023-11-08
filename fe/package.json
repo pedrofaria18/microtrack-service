@@ -14,7 +14,6 @@
     "react-ace": "^10.1.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.11.0",
-    "react-json-view": "^1.21.3",
     "react-modal": "^3.16.1",
     "react-router-dom": "^6.9.0",
     "reactflow": "^11.9.2",

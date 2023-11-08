@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { getTraces } from '../service';
+import { deleteTrace, getTraces } from '../service';
 
 import formatDate from '../utils/date';
 
@@ -22,6 +22,14 @@ export default function TableList() {
 
     loadTraces();
   }, []);
+
+  const handleDelete = async (traceId: string) => {
+    await deleteTrace(traceId);
+
+    const traceList = await getTraces();
+
+    setTraces(traceList);
+  };
 
   return (
     <div
@@ -56,6 +64,7 @@ export default function TableList() {
           </th>
           <th>DATA DE CRIAÇÃO</th>
           <th>DATA DE ATUALIZAÇÃO</th>
+          <th>AÇÕES</th>
         </thead>
 
         <tbody
@@ -66,15 +75,7 @@ export default function TableList() {
         "
         >
           {traces.map((trace) => (
-            <tr
-              key={trace._id}
-              className="cursor-pointer
-          hover:bg-[#e7eaee]
-          "
-              onClick={() => {
-                navigate(`/traces/${trace.traceId}`);
-              }}
-            >
+            <tr key={trace._id}>
               <td
                 className="
                 font-bold
@@ -82,13 +83,47 @@ export default function TableList() {
                 px-6
                 truncate
                 max-w-[300px]
-
+                cursor-pointer
               "
+                onClick={() => {
+                  navigate(`/traces/${trace.traceId}`);
+                }}
               >
                 {trace.traceId}
               </td>
-              <td>{formatDate(trace.createdAt)}</td>
-              <td>{formatDate(trace.updatedAt)}</td>
+              <td
+                className="
+                  cursor-pointer
+                "
+                onClick={() => {
+                  navigate(`/traces/${trace.traceId}`);
+                }}
+              >
+                {formatDate(trace.createdAt)}
+              </td>
+              <td
+                className="
+                  cursor-pointer
+                "
+                onClick={() => {
+                  navigate(`/traces/${trace.traceId}`);
+                }}
+              >
+                {formatDate(trace.updatedAt)}
+              </td>
+              <td>
+                <span
+                  className="
+                    text-[#FF0000]
+                    cursor-pointer
+                  "
+                  onClick={() => {
+                    handleDelete(trace.traceId);
+                  }}
+                >
+                  Apagar
+                </span>
+              </td>
             </tr>
           ))}
         </tbody>

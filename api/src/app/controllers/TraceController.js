@@ -25,8 +25,8 @@ class TraceController {
       traceId,
       timestamp,
       checkpointName,
+      successorBy,
     } = request.body;
-
 
     if (!traceId) {
       return response.status(404).json({ error: 'Trace ID is required' });
@@ -49,14 +49,51 @@ class TraceController {
     let trace = {};
 
     if (traceExists) {
+      if (successorBy.length === 0) {
+        return response.status(404).json({ error: 'Successor by is required' });
+      }
+
+      let hasError = false;
+
+      successorBy.forEach((successor) => {
+        const successorByExists = traceExists.events.find((event) => event.checkpointName === successor);
+
+        if (!successorByExists) {
+          hasError = true;
+        }
+      });
+
+      if (hasError) {
+        return response.status(404).json({ error: `One or more successor(s) do not exist` });
+      }
+
       trace = await TraceRepository.update(request.body);
     } else {
+      if (successorBy.length > 0) {
+        return response.status(404).json({ error: 'Successor by is not required' });
+      }
+
       trace = await TraceRepository.create(request.body);
     }
 
     response.status(201).json({
       message: 'Checkpoint saved successfully',
+      trace,
     });
+  }
+
+  async delete(request, response) {
+    const { traceId } = request.params;
+
+    const trace = await TraceRepository.findByTraceId(traceId);
+
+    if (!trace) {
+      return response.status(404).json({ error: 'Trace not found' });
+    }
+
+    await TraceRepository.delete(traceId);
+
+    response.status(204).json();
   }
 }
 

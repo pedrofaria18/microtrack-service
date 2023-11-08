@@ -7,9 +7,23 @@ export interface Trace {
 }
 
 export interface Event {
+  id: string;
   serviceName: string;
   checkpointName: string;
   timestamp: string;
   isError: boolean;
-  genericData: any;
+  genericData: object;
+}
+
+export interface TraceNode {
+  serviceName: string;
+  checkpointName: string;
+  timestamp: string;
+  isError: boolean;
+  genericData: object;
+}
+
+export interface TraceEdge {
+  source: string;
+  target: string;
 }

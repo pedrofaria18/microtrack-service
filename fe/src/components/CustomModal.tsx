@@ -1,7 +1,5 @@
 import Modal from 'react-modal';
 
-import { Event } from '../types/Trace';
-
 import TextAreaJsonEditor from './JsonView';
 
 export function CustomModal({
@@ -11,7 +9,7 @@ export function CustomModal({
 }: {
   isOpen: boolean;
   onRequestClose: () => void;
-  body: Event;
+  body: any;
 }) {
   return (
     <Modal
@@ -24,7 +22,7 @@ export function CustomModal({
     >
       <div className="flex flex-row w-full items-center justify-between mb-4 gap-3">
         <h2 className="text-2xl font-bold">
-          Visualização {body.checkpointName}
+          Visualização {body.events[0].checkpointName}
         </h2>
         <span
           onClick={onRequestClose}

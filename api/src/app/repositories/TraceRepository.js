@@ -1,4 +1,8 @@
 const { tracesCollection } = require("../../database");
+
+const {
+  v4: uuid,
+} = require("uuid");
 class TraceRepository {
   async findAll() {
     const traces = await tracesCollection.find().toArray();
@@ -12,17 +16,19 @@ class TraceRepository {
     return trace;
   }
 
-  async create({ serviceName, traceId, genericData, timestamp, checkpointName, isError }) {
+  async create({ serviceName, traceId, genericData, timestamp, checkpointName, isError, successorBy }) {
     await tracesCollection.insertOne({
       traceId,
       createdAt: new Date(),
       updatedAt: new Date(),
       events: [
         {
+          id: uuid(),
           serviceName,
           timestamp,
           checkpointName,
           isError,
+          successorBy,
           genericData: genericData || null
         }
       ]
@@ -33,7 +39,7 @@ class TraceRepository {
     return traceCreated;
   }
 
-  async update({ traceId, serviceName, timestamp, checkpointName, isError, genericData }) {
+  async update({ traceId, serviceName, timestamp, checkpointName, isError, genericData, successorBy }) {
     await tracesCollection.updateOne(
       { traceId },
       {
@@ -42,15 +48,25 @@ class TraceRepository {
         },
         $push: {
           events: {
+            id: uuid(),
             serviceName,
             timestamp,
             checkpointName,
             isError,
+            successorBy,
             genericData: genericData || null
           }
         }
       }
     );
+
+    const traceUpdated = await tracesCollection.findOne({ traceId });
+
+    return traceUpdated;
+  }
+
+  async delete(traceId) {
+    await tracesCollection.deleteOne({ traceId });
   }
 }
 
