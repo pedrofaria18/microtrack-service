@@ -23,7 +23,6 @@ class TraceRepository {
       updatedAt: new Date(),
       events: [
         {
-          id: uuid(),
           serviceName,
           timestamp,
           checkpointName,
@@ -48,7 +47,6 @@ class TraceRepository {
         },
         $push: {
           events: {
-            id: uuid(),
             serviceName,
             timestamp,
             checkpointName,

@@ -39,18 +39,86 @@ export default function Trace() {
     });
 
     socket.on('trace', (change) => {
+      const nodesPosition: any[] = [];
+
+      console.log(change);
+
+      change.nodes.forEach((node: any, index: number) => {
+        if (index === 0) {
+          nodesPosition.push({
+            id: node.checkpointName,
+            position: { x: 0, y: 0 },
+          });
+        } else {
+          // Pega o nó de onde vem a aresta
+          const sourceOfThisNode = change.edges.find(
+            (edge: any) => edge.target === node.checkpointName
+          ).source;
+
+          // Pega todos os nós que tem aresta com o nó de onde vem a aresta
+          const targetsOfThisNode = change.edges
+            .filter((edge: any) => edge.source === sourceOfThisNode)
+            .map((edge: any) => edge.target);
+
+          // Pega a posição do nó de onde vem a aresta
+          const positionOfSource = nodesPosition.find(
+            (nodePosition) => nodePosition.id === sourceOfThisNode
+          ).position;
+
+          if (targetsOfThisNode.length === 1) {
+            nodesPosition.push({
+              id: node.checkpointName,
+              position: {
+                x: positionOfSource.x + 200,
+                y: positionOfSource.y,
+              },
+            });
+          } else {
+            targetsOfThisNode.forEach((target: any, indexTarget: number) => {
+              const thisNodeAlreadyHasPosition = nodesPosition.some(
+                (nodePosition) => nodePosition.id === target
+              );
+
+              if (!thisNodeAlreadyHasPosition) {
+                nodesPosition.push({
+                  id: node.checkpointName,
+                  position: {
+                    x: positionOfSource.x + 200,
+                    y: positionOfSource.y + 100 * indexTarget * 2,
+                  },
+                });
+              }
+            });
+          }
+        }
+      });
+
+      const nodesPositionWithoutDuplicates: any[] = [];
+
+      nodesPosition.forEach((nodePosition) => {
+        const nodeAlreadyExists = nodesPositionWithoutDuplicates.some(
+          (nodePositionWithoutDuplicate) =>
+            nodePositionWithoutDuplicate.id === nodePosition.id
+        );
+
+        if (!nodeAlreadyExists) {
+          nodesPositionWithoutDuplicates.push(nodePosition);
+        }
+      });
+
       const initialNodes = change.nodes.map((node: any, index: number) => {
         const hasTarget = change.edges.some(
           (edge: any) => edge.source === node.checkpointName
         );
 
+        const { position } = nodesPositionWithoutDuplicates.find(
+          (nodePosition) => nodePosition.id === node.checkpointName
+        );
+
         return {
           id: node.checkpointName,
           data: { label: node.checkpointName, node },
-          position: {
-            x: index === 0 ? 0 : Math.random() * 1000,
-            y: index === 0 ? 0 : Math.random() * 500,
-          },
+          position,
           sourcePosition: hasTarget ? 'right' : 'left',
           targetPosition: index === 0 ? 'right' : 'left',
           connectable: false,
@@ -86,7 +154,7 @@ export default function Trace() {
   }, [traceId]);
 
   const onNodesChange = useCallback(
-    (changes: any) => setNodes((nds) => applyNodeChanges(changes, nds)),
+    (changes: any) => setNodes((nds: any) => applyNodeChanges(changes, nds)),
     []
   );
   const onEdgesChange = useCallback(
