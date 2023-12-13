@@ -10,7 +10,7 @@ Artigo publicado sobre o projeto:
 
 ## Utilização da api
 - Ir até o diretório ```/api```
-- Executar o comando ```docker compose up``` para realizar a inicialização do conteiner docker
+- Executar o comando ```docker compose up``` para realizar a inicialização do container docker
 - Executar o comando ```yarn dev``` para iniciar aplicação
 
 ## Utilização da interface web
