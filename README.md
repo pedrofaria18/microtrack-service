@@ -17,7 +17,7 @@ Artigo publicado sobre o projeto:
 - Ir até o diretório ```/fe```
 - Executar o comando ```yarn dev``` para iniciar aplicação
 
-- ## Utilização do websocket
+## Utilização do websocket
 - Ir até o diretório ```/websocket```
 - Caso o docker compose não esteja iniciado, vá até o diretório ```/api``` e execute o comando ```docker compose up```
 - Executar o comando ```yarn dev``` para iniciar aplicação
